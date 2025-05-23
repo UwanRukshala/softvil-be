@@ -2,11 +2,15 @@ package lk.softvil.assignment.eventm.model.entity;
 
 import jakarta.persistence.*;
 import lk.softvil.assignment.eventm.model.enums.AttendanceStatus;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Getter
+@Setter
 public class Attendance {
     @Id
     @GeneratedValue

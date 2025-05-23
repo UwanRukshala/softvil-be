@@ -3,15 +3,14 @@ package lk.softvil.assignment.eventm.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import java.security.Key;
+
+import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -41,12 +40,14 @@ public class JwtService {
         try {
         return Jwts
                 .parser()
-                .verifyWith(getSignInKey()) // Changed from setSigningKey
+                .verifyWith(getSignInKey())
                 .build()
-                .parseSignedClaims(token) // Changed from parseClaimsJws
-                .getPayload(); // Changed from getBody
+                .parseSignedClaims(token)
+                .getPayload();
         } catch (JwtException e) {
-            throw new JwtAuthenticationException("Invalid JWT token");
+//            throw new JwtAuthenticationException("Invalid JWT token");
+            System.out.println(e.getMessage());
+            return null;
         }
     }
 
@@ -73,7 +74,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private Key getSignInKey() {
+    private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }

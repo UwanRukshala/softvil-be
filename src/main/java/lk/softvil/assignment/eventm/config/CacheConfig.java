@@ -1,15 +1,15 @@
 package lk.softvil.assignment.eventm.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import javax.cache.CacheManager;
-import javax.cache.configuration.MutableConfiguration;
-
+import javax.cache.Caching;
 import java.util.concurrent.TimeUnit;
+import javax.cache.configuration.MutableConfiguration;
+import org.springframework.cache.jcache.JCacheCacheManager;
 
 @Configuration
 @EnableCaching
@@ -17,20 +17,20 @@ public class CacheConfig {
 
 
     @Bean
-    public CacheManager cacheManager() {
-        CaffeineCachingProvider provider = new CaffeineCachingProvider();
-        CacheManager cacheManager = provider.getCacheManager(
-                provider.getDefaultURI(),
-                provider.getDefaultClassLoader()
-        );
+    public CacheManager jCacheManager() {
+        javax.cache.spi.CachingProvider provider = Caching.getCachingProvider();
+        CacheManager cacheManager = provider.getCacheManager();
 
-        // Configure rate limit cache
         cacheManager.createCache("rate-limit-buckets",
                 new MutableConfiguration<>()
-                        .setStatisticsEnabled(true)
-                        .setManagementEnabled(true)
-        );
+                        .setStoreByValue(false)
+                        .setStatisticsEnabled(true));
 
         return cacheManager;
+    }
+
+    @Bean
+    public org.springframework.cache.CacheManager springCacheManager(CacheManager jCacheManager) {
+        return new JCacheCacheManager(jCacheManager);
     }
 }

@@ -41,7 +41,7 @@ public class Event {
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
-    private boolean deleted = false;
+    private boolean deleted;
 
     public void softDelete() {
         this.deleted = true;

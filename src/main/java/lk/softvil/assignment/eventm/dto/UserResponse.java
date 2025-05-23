@@ -17,7 +17,7 @@ public record UserResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole().name(), // Convert ERole to String
+                user.getRole(),
                 user.getCreatedAt()
         );
     }
