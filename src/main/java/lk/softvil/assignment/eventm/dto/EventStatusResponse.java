@@ -13,8 +13,8 @@ public record EventStatusResponse(
         UUID hostId,
 
         // Timing Information
-        String startTime,
-        String endTime,
+        LocalDateTime startTime,
+        LocalDateTime endTime,
 
         boolean isOngoing,
         boolean isUpcoming,
@@ -32,8 +32,8 @@ public record EventStatusResponse(
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-        LocalDateTime startTime = LocalDateTime.parse(event.getStartTime(), formatter);
-        LocalDateTime endTime = LocalDateTime.parse(event.getEndTime(), formatter);
+        LocalDateTime startTime = event.getStartTime();
+        LocalDateTime endTime = event.getEndTime();
         LocalDateTime now = LocalDateTime.now();
 
         boolean isOngoing = now.isAfter(startTime) && now.isBefore(endTime);

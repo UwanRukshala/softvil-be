@@ -30,17 +30,17 @@ public class EventController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponse createEvent(
             @RequestBody @Valid CreateEventRequest request,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return eventService.createEvent(request, customUserDetails.getUserId());
+@AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        return eventService.createEvent(request,customUserDetails);
     }
 
     // Update event (host or admin only)
     @PutMapping("/{eventId}")
     public EventResponse updateEvent(
             @PathVariable UUID eventId,
-            @RequestBody @Valid UpdateEventRequest request,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return eventService.updateEvent(eventId, request, customUserDetails.getUserId());
+            @RequestBody @Valid UpdateEventRequest request) {
+        return eventService.updateEvent(eventId, request);
     }
 
     // Soft delete event (host or admin only)
@@ -66,6 +66,8 @@ public class EventController {
     @GetMapping("/all")
     public Page<EventResponse> getAllEvents(
             @RequestParam(required = false) Visibility visibility,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             @PageableDefault(sort = "startTime", direction = Sort.Direction.ASC) Pageable pageable) {
         return eventService.getAllEvents(visibility, pageable);
     }

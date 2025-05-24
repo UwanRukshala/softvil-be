@@ -26,12 +26,15 @@ public class Event {
 
     @ManyToOne
     @JoinColumn(name = "host_id", referencedColumnName = "id")
-    private User host; // Foreign key to User
+    private User host;
 
-    private String startTime;
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
 
-    private String endTime;
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
 
+    @Column(name = "location")
     private String location;
 
     @Enumerated(EnumType.STRING)
@@ -50,7 +53,6 @@ public class Event {
         this.deleted = true;
     }
 
-    // Getters, setters, and timestamp handlers
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
