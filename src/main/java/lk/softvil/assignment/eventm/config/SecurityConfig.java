@@ -34,7 +34,8 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/users/register"
                         ).permitAll()
-                        .requestMatchers("/api/events/**").authenticated()
+                        .requestMatchers("/events/**").authenticated()
+                        .requestMatchers("/users/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

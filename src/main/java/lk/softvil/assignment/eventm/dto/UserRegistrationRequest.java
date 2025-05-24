@@ -6,5 +6,6 @@ import lk.softvil.assignment.eventm.model.enums.UserRole;
 public record UserRegistrationRequest(
         @NotBlank String username,
         @Email String email,
-        @NotNull UserRole role
+        @NotNull UserRole role,
+        @NotNull boolean bothAdminAndHost
 ) {}

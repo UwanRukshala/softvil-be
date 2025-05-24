@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lk.softvil.assignment.eventm.model.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,13 @@ public class JwtService {
 
     // Generate token with extra claims
     public String generateToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails
+            User user
     ) {
         return Jwts
                 .builder()
-                .claims(extraClaims)
-                .subject(userDetails.getUsername())
+                .subject(user.getEmail())
+                .claim("role", user.getRole())
+                .claim("name",user.getName())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSignInKey())
@@ -53,6 +54,9 @@ public class JwtService {
 
     // Helper methods remain the same
     public String extractUsername(String token) {
+        return extractClaim(token, claims -> claims.get("name", String.class));
+    }
+    public String extractUserEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -62,8 +66,8 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        final String userEmail = extractUserEmail(token);
+        return (userEmail.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

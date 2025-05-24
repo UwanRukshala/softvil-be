@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public interface UserService {
     UserResponse registerUser(UserRegistrationRequest request);
+    UserResponse registerUserByAdmin(UserRegistrationRequest request);
     UserResponse getUserById(UUID id);
     Page<UserResponse> getAllUsers(int page, int size);
     Page<UserResponse> getUsersByRole(UserRole role, int page, int size);

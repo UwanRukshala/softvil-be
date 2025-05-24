@@ -10,6 +10,7 @@ public record UserResponse(
         String name,
         String email,
         String role,
+        boolean status,
         LocalDateTime createdAt
 ) {
     public static UserResponse fromEntity(User user) {
@@ -17,7 +18,8 @@ public record UserResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole(),
+                user.getRole().name(),
+                user.isStatus(),
                 user.getCreatedAt()
         );
     }

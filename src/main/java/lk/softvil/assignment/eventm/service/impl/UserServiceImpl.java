@@ -24,17 +24,38 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
+    public UserResponse registerUserByAdmin(UserRegistrationRequest request) {
+        if (userRepository.existsByEmail(request.email())) {
+            throw new EmailAlreadyExistsException(request.email());
+        }
+        UserRole role=(request.bothAdminAndHost()?UserRole.ADMIN:request.role());
+
+        User user = User.builder()
+                .name(request.username())
+                .email(request.email())
+                .role(role)
+                .bothAdminAndHost(request.bothAdminAndHost())
+                .createdAt(LocalDateTime.now())
+                .status(true)
+                .build();
+
+
+        User savedUser = userRepository.save(user);
+        return userMapper.toResponse(savedUser);
+    }
+
+    @Override
     public UserResponse registerUser(UserRegistrationRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyExistsException(request.email());
         }
 
-
         User user = User.builder()
                 .name(request.username())
                 .email(request.email())
-                .role(request.role().name())
+                .role(UserRole.USER)
                 .createdAt(LocalDateTime.now())
+                .status(true)
                 .build();
 
 

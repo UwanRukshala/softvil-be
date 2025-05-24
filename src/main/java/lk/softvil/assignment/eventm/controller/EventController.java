@@ -2,9 +2,8 @@ package lk.softvil.assignment.eventm.controller;
 
 import jakarta.validation.Valid;
 import lk.softvil.assignment.eventm.dto.*;
-import lk.softvil.assignment.eventm.model.entity.Event;
 import lk.softvil.assignment.eventm.model.enums.Visibility;
-import lk.softvil.assignment.eventm.security.UserPrincipal;
+import lk.softvil.assignment.eventm.security.CustomUserDetails;
 import lk.softvil.assignment.eventm.service.AttendanceService;
 import lk.softvil.assignment.eventm.service.EventService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,8 +30,8 @@ public class EventController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponse createEvent(
             @RequestBody @Valid CreateEventRequest request,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return eventService.createEvent(request, userPrincipal.getUserId());
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return eventService.createEvent(request, customUserDetails.getUserId());
     }
 
     // Update event (host or admin only)
@@ -41,8 +39,8 @@ public class EventController {
     public EventResponse updateEvent(
             @PathVariable UUID eventId,
             @RequestBody @Valid UpdateEventRequest request,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return eventService.updateEvent(eventId, request, userPrincipal.getUserId());
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return eventService.updateEvent(eventId, request, customUserDetails.getUserId());
     }
 
     // Soft delete event (host or admin only)
@@ -50,8 +48,8 @@ public class EventController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEvent(
             @PathVariable UUID eventId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        eventService.softDeleteEvent(eventId, userPrincipal.getUserId());
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        eventService.softDeleteEvent(eventId, customUserDetails.getUserId());
     }
 
     // List events with filtering
@@ -65,8 +63,15 @@ public class EventController {
         return eventService.getEvents(from, to, location, visibility, pageable);
     }
 
+    @GetMapping("/all")
+    public Page<EventResponse> getAllEvents(
+            @RequestParam(required = false) Visibility visibility,
+            @PageableDefault(sort = "startTime", direction = Sort.Direction.ASC) Pageable pageable) {
+        return eventService.getAllEvents(visibility, pageable);
+    }
+
     // Get event details with attendee count
-    @GetMapping("/{eventId}")
+    @GetMapping("/search/{eventId}")
     public EventDetailsResponse getEventDetails(@PathVariable UUID eventId) {
         return eventService.getEventDetails(eventId);
     }

@@ -5,7 +5,7 @@ import lk.softvil.assignment.eventm.exception.InvalidOtpException;
 import lk.softvil.assignment.eventm.exception.UserNotFoundException;
 import lk.softvil.assignment.eventm.model.entity.User;
 import lk.softvil.assignment.eventm.repository.UserRepository;
-import lk.softvil.assignment.eventm.security.jwt.JwtTokenProvider;
+import lk.softvil.assignment.eventm.security.jwt.JwtService;
 import lk.softvil.assignment.eventm.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class AuthService {
     private final OtpService otpService;
     private final EmailService emailService;
     private final UserRepository userRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtService jwtService;
 
 
     public Map<String, String> initiateLogin(String email) {
@@ -48,7 +48,7 @@ public class AuthService {
 
 
         // Generate JWT token
-        String token = jwtTokenProvider.generateToken(user);
+        String token = jwtService.generateToken(user);
 
         // Clear used OTP
         otpService.clearOtp(email);
@@ -58,7 +58,7 @@ public class AuthService {
                 "message", "Login successful",
                 "userId", user.getId().toString(),
                 "email", user.getEmail(),
-                "role", user.getRole()
+                "role", user.getRole().name()
         );
     }
 }

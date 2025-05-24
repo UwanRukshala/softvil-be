@@ -14,5 +14,6 @@ public interface EventService {
     Page<EventResponse> getEvents(LocalDateTime from, LocalDateTime to,
                                   String location, Visibility visibility,
                                   Pageable pageable);
+    Page<EventResponse> getAllEvents(Visibility visibility,Pageable pageable);
     EventDetailsResponse getEventDetails(UUID eventId);
 }

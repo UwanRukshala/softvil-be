@@ -8,6 +8,7 @@ import lk.softvil.assignment.eventm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,11 +26,17 @@ public class UserController {
         return userService.registerUser(request);
     }
 
+    @PostMapping("/registerByAdmin")
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserResponse registerUserByAdmin(@RequestBody UserRegistrationRequest request) {
+        return userService.registerUserByAdmin(request);
+    }
+
     @GetMapping("/{id}")
     public UserResponse getUser(@PathVariable UUID id) {
         return userService.getUserById(id);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public Page<UserResponse> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
@@ -37,6 +44,7 @@ public class UserController {
         return userService.getAllUsers(page, size);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HOST')")
     @GetMapping("/by-role/{role}")
     public Page<UserResponse> getUsersByRole(
             @PathVariable UserRole role,

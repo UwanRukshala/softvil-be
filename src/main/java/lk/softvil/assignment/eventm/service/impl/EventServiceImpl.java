@@ -39,6 +39,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public Page<EventResponse> getAllEvents(Visibility visibility, Pageable pageable) {
+        return null;
+    }
+
+    @Override
     public EventDetailsResponse getEventDetails(UUID eventId) {
         return null;
     }

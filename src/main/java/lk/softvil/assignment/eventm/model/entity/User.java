@@ -1,5 +1,6 @@
 package lk.softvil.assignment.eventm.model.entity;
 import jakarta.persistence.*;
+import lk.softvil.assignment.eventm.model.enums.UserRole;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -24,13 +25,17 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String role; // Or use @Enumerated if role is an enum
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name="both_admin_and_host",nullable = false)
+    private boolean bothAdminAndHost;
 
     @Column(nullable = false)
     private boolean status;
