@@ -9,6 +9,9 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import java.util.concurrent.TimeUnit;
 import javax.cache.configuration.MutableConfiguration;
+import javax.cache.expiry.CreatedExpiryPolicy;
+import javax.cache.expiry.Duration;
+
 import org.springframework.cache.jcache.JCacheCacheManager;
 
 @Configuration
@@ -25,6 +28,16 @@ public class CacheConfig {
                 new MutableConfiguration<>()
                         .setStoreByValue(false)
                         .setStatisticsEnabled(true));
+
+        cacheManager.createCache("otp-cache",
+                new MutableConfiguration<>()
+                        .setStoreByValue(false)
+                        .setStatisticsEnabled(true)
+                        .setExpiryPolicyFactory(
+                                CreatedExpiryPolicy.factoryOf(
+                                        new Duration(TimeUnit.MINUTES, 2)
+                                )
+                        ));
 
         return cacheManager;
     }

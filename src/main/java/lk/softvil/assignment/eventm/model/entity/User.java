@@ -1,14 +1,16 @@
 package lk.softvil.assignment.eventm.model.entity;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "\"user\"")
-@Getter
-
+@Table(name = "user")
+@Getter @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue

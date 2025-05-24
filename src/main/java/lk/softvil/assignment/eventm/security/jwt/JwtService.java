@@ -27,11 +27,11 @@ public class JwtService {
     ) {
         return Jwts
                 .builder()
-                .claims(extraClaims) // New method in 0.12.x
+                .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 hours
-                .signWith(getSignInKey()) // Updated signature algorithm reference
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                .signWith(getSignInKey())
                 .compact();
     }
 

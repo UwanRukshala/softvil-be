@@ -9,7 +9,7 @@ public record UserResponse(
         UUID id,
         String name,
         String email,
-        String role,  // String representation of ERole
+        String role,
         LocalDateTime createdAt
 ) {
     public static UserResponse fromEntity(User user) {
