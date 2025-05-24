@@ -36,6 +36,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/events/**").authenticated()
                         .requestMatchers("/users/**").authenticated()
+                        .requestMatchers("/attendance/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

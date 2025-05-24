@@ -39,6 +39,16 @@ public class CacheConfig {
                                 )
                         ));
 
+        cacheManager.createCache("upcomingEvents",
+                new MutableConfiguration<>()
+                        .setStoreByValue(false)
+                        .setStatisticsEnabled(true)
+                        .setExpiryPolicyFactory(
+                                CreatedExpiryPolicy.factoryOf(
+                                        new Duration(TimeUnit.MINUTES, 10)
+                                )
+                        ));
+
         return cacheManager;
     }
 

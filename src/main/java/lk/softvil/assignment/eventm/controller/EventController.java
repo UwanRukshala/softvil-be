@@ -78,17 +78,12 @@ public class EventController {
         return eventService.getEventDetails(eventId);
     }
 
-    // List user's events (hosting or attending)
-//    @GetMapping("/user/{userId}")
-//    public UserEventsResponse getUserEvents(
-//            @PathVariable UUID userId,
-//            @PageableDefault Pageable pageable) {
-//        return eventService.getUserEvents(userId, pageable);
-//    }
-//
-//    // Check event status
-//    @GetMapping("/{eventId}/status")
-//    public EventStatusResponse getEventStatus(@PathVariable UUID eventId) {
-//        return eventService.getEventStatus(eventId);
-//    }
+    @GetMapping("/upcoming")
+    public Page<EventResponse> getUpcomingEvents(
+            @RequestParam(required = false) Visibility visibility,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @PageableDefault(sort = "startTime", direction = Sort.Direction.ASC) Pageable pageable) {
+        return eventService.getUpcomingEvents(visibility, pageable);
+    }
 }

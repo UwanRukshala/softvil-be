@@ -147,9 +147,7 @@ public class EventServiceImpl implements EventService {
                 .endTime(event.getEndTime())
                 .location(event.getLocation())
                 .visibility(event.getVisibility())
-                .hostId(event.getHost().getId())
                 .hostName(event.getHost().getName())
-                .hostEmail(event.getHost().getEmail())
                 .createdAt(event.getCreatedAt())
                 .updatedAt(event.getUpdatedAt())
                 .build();
@@ -191,4 +189,23 @@ public class EventServiceImpl implements EventService {
     private static Specification<Event> visibilityEquals(Visibility visibility) {
         return (root, query, cb) -> cb.equal(root.get("visibility"), visibility);
     }
+
+    public static Specification<Event> endTimeAfter(LocalDateTime now) {
+        return (root, query, cb) -> cb.greaterThan(root.get("endTime"), now);
+    }
+
+    @Cacheable(value = "upcomingEvents", key = "#visibility != null ? #visibility.name() + '-' + #pageable.pageNumber + '-' + #pageable.pageSize : 'all-' + #pageable.pageNumber + '-' + #pageable.pageSize")
+    public Page<EventResponse> getUpcomingEvents(Visibility visibility, Pageable pageable) {
+        Specification<Event> spec = Specification.where(notDeleted())
+                .and(endTimeAfter(LocalDateTime.now()));
+
+        if (visibility != null && visibility != Visibility.ALL) {
+            spec = spec.and(visibilityEquals(visibility));
+        }
+
+        return eventMapper.mapEventPageToEventResponsePage(eventRepository.findAll(spec, pageable));
+
+    }
+
+
 }

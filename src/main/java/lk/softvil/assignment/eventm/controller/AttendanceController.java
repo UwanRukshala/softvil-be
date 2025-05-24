@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/attendances")
+@RequestMapping("/attendance")
 @RequiredArgsConstructor
 public class AttendanceController {
 
@@ -25,6 +25,12 @@ public class AttendanceController {
             @AuthenticationPrincipal User user) {
         return attendanceService.respondToEvent(eventId, user.getId(), request);
     }
-
+    @GetMapping("/events/{eventId}")
+    public AttendanceResponse getAttendanceEventStatus(
+            @PathVariable UUID eventId,
+            @RequestBody AttendanceUpdateRequest request,
+            @AuthenticationPrincipal User user) {
+        return attendanceService.respondToEvent(eventId, user.getId(), request);
+    }
 
 }

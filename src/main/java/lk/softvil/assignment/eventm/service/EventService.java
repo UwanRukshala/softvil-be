@@ -17,4 +17,5 @@ public interface EventService {
                                   Pageable pageable);
     Page<EventResponse> getAllEvents(Visibility visibility,Pageable pageable);
     EventDetailsResponse getEventDetails(UUID eventId);
+    Page<EventResponse> getUpcomingEvents(Visibility visibility, Pageable pageable);
 }

@@ -13,11 +13,7 @@ public record EventDetailsResponse(
         String title,
         String description,
 
-        // Host Information
-        UUID hostId,
         String hostName,
-        String hostEmail,
-
         // Event Timing
         LocalDateTime startTime,
         LocalDateTime endTime,
@@ -37,11 +33,9 @@ public record EventDetailsResponse(
 
         // Timestamps
         LocalDateTime createdAt,
-        LocalDateTime updatedAt,
+        LocalDateTime updatedAt
 
-        // Additional Metadata
-        List<String> tags,
-        String imageUrl
+
 ) {
     public record AttendeeInfo(
             UUID userId,
