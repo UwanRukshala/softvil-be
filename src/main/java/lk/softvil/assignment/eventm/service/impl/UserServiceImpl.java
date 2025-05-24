@@ -2,6 +2,7 @@ package lk.softvil.assignment.eventm.service.impl;
 
 import lk.softvil.assignment.eventm.dto.UserRegistrationRequest;
 import lk.softvil.assignment.eventm.dto.UserResponse;
+import lk.softvil.assignment.eventm.exception.EmailAlreadyExistsException;
 import lk.softvil.assignment.eventm.exception.UserNotFoundException;
 import lk.softvil.assignment.eventm.mapper.UserMapper;
 import lk.softvil.assignment.eventm.model.entity.User;
@@ -11,6 +12,8 @@ import lk.softvil.assignment.eventm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -23,9 +26,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse registerUser(UserRegistrationRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-//            throw new EmailAlreadyExistsException("Email already registered");
-
-            System.out.println("Email already registered");
+            throw new EmailAlreadyExistsException(request.email());
         }
 
 
@@ -33,10 +34,13 @@ public class UserServiceImpl implements UserService {
                 .name(request.username())
                 .email(request.email())
                 .role(request.role().name())
+                .createdAt(LocalDateTime.now())
                 .build();
+
 
         User savedUser = userRepository.save(user);
         return userMapper.toResponse(savedUser);
+
     }
 
     @Override

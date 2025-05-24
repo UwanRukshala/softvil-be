@@ -2,15 +2,17 @@ package lk.softvil.assignment.eventm.model.entity;
 
 import jakarta.persistence.*;
 import lk.softvil.assignment.eventm.model.enums.Visibility;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Table(name = "event")
+@Getter @Setter
 @Builder
-@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
     @Id
     @GeneratedValue
@@ -23,21 +25,22 @@ public class Event {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "hostId", referencedColumnName = "id")
+    @JoinColumn(name = "host_id", referencedColumnName = "id")
     private User host; // Foreign key to User
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private String startTime;
+
+    private String endTime;
 
     private String location;
 
     @Enumerated(EnumType.STRING)
-    private Visibility visibility; // Enum: PUBLIC, PRIVATE
+    private Visibility visibility;
 
-    @Column(name = "createdAt")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updatedAt")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)

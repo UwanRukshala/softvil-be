@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user")
+@Table(name = "app_user")
 @Getter @Setter
 @Builder
 @NoArgsConstructor
@@ -26,16 +26,16 @@ public class User {
     @Column(nullable = false)
     private String role; // Or use @Enumerated if role is an enum
 
-    @Column(name = "createdAt", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updatedAt")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
     private boolean status;
 
-    // Getters, setters, and timestamp handlers
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

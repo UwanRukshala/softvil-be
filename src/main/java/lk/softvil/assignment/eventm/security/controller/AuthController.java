@@ -1,5 +1,6 @@
 package lk.softvil.assignment.eventm.security.controller;
 
+import lk.softvil.assignment.eventm.dto.VerifyOtpRequest;
 import lk.softvil.assignment.eventm.repository.UserRepository;
 import lk.softvil.assignment.eventm.security.service.AuthService;
 import lk.softvil.assignment.eventm.security.service.OtpService;
@@ -20,23 +21,17 @@ public class AuthController {
 
     @PostMapping("/initiate-login")
     public ResponseEntity<?> initiateLogin(@RequestParam String email) {
-        try {
+
             return ResponseEntity.ok(authService.initiateLogin(email));
-        } catch (Exception e) {
-            e.printStackTrace();  // Or log.error(...)
-            return ResponseEntity.status(500).body("Something went wrong: " + e.getMessage());
-        }
+
     }
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(
-            @RequestParam String email,
-            @RequestParam String otp) {
-
-
+            @RequestBody VerifyOtpRequest verifyOtpRequest) {
 
         return ResponseEntity.ok().body(
-              authService.verifyOtp(email, otp)
+              authService.verifyOtp(verifyOtpRequest.email(), verifyOtpRequest.otp())
         );
     }
 }

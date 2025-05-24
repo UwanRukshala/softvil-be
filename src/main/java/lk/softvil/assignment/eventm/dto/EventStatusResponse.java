@@ -3,6 +3,7 @@ import lk.softvil.assignment.eventm.model.entity.Event;
 import lk.softvil.assignment.eventm.model.enums.Visibility;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public record EventStatusResponse(
@@ -12,8 +13,8 @@ public record EventStatusResponse(
         UUID hostId,
 
         // Timing Information
-        LocalDateTime startTime,
-        LocalDateTime endTime,
+        String startTime,
+        String endTime,
 
         boolean isOngoing,
         boolean isUpcoming,
@@ -28,10 +29,16 @@ public record EventStatusResponse(
         LocalDateTime updatedAt
 ) {
     public static EventStatusResponse fromEvent(Event event, int attendeeCount) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+        LocalDateTime startTime = LocalDateTime.parse(event.getStartTime(), formatter);
+        LocalDateTime endTime = LocalDateTime.parse(event.getEndTime(), formatter);
         LocalDateTime now = LocalDateTime.now();
-        boolean isOngoing = now.isAfter(event.getStartTime()) && now.isBefore(event.getEndTime());
-        boolean isUpcoming = now.isBefore(event.getStartTime());
-        boolean isPast = now.isAfter(event.getEndTime());
+
+        boolean isOngoing = now.isAfter(startTime) && now.isBefore(endTime);
+        boolean isUpcoming = now.isBefore(startTime);
+        boolean isPast = now.isAfter(endTime);
 
         return new EventStatusResponse(
                 event.getId(),

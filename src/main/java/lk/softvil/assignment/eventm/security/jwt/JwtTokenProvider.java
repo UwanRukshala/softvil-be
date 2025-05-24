@@ -3,6 +3,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import lk.softvil.assignment.eventm.model.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,19 +26,16 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
+    public String generateToken(User user) {
+
+        String username = user.getName();
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
         return Jwts.builder()
                 .subject(username)  // Changed from setSubject()
-                .claim("roles", authorities)
+                .claim("role", user.getRole())
                 .issuedAt(now)      // Changed from setIssuedAt()
                 .expiration(expiryDate) // Changed from setExpiration()
                 .signWith(key()) // Changed from signWith(key())

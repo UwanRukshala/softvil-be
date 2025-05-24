@@ -2,15 +2,17 @@ package lk.softvil.assignment.eventm.model.entity;
 
 import jakarta.persistence.*;
 import lk.softvil.assignment.eventm.model.enums.AttendanceStatus;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Getter
-@Setter
+@Table(name = "attendance")
+@Getter @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Attendance {
     @Id
     @GeneratedValue
@@ -18,17 +20,17 @@ public class Attendance {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "eventId", nullable = false)
+    @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Enumerated(EnumType.STRING)
-    private AttendanceStatus status; // Enum: GOING, MAYBE
+    private AttendanceStatus status;
 
-    @Column(name = "respondedAt", nullable = false)
+    @Column(name = "responded_at", nullable = false)
     private LocalDateTime respondedAt;
 
     // Getters and setters
