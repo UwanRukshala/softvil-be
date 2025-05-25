@@ -8,9 +8,9 @@ import java.util.Collection;
 import java.util.UUID;
 
 public class CustomUserDetails implements UserDetails {
-    // Correct method name to get user ID
+
     @Getter
-    private final UUID userId;  // Using UUID as ID type
+    private final UUID userId;
     private final String email;
     private final Collection<? extends GrantedAuthority> authorities;
 
@@ -21,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
         this.authorities = authorities;
     }
 
-    // Standard UserDetails methods
+
     @Override
     public String getUsername() {
         return email;
