@@ -15,7 +15,7 @@ public class RateLimitPolicyConfig {
     @Bean
     public Supplier<BucketConfiguration> bucketConfiguration() {
         return () -> BucketConfiguration.builder()
-                .addLimit(Bandwidth.classic(10, Refill.intervally(10, Duration.ofMinutes(1))))
+                .addLimit(Bandwidth.classic(250, Refill.intervally(250, Duration.ofMinutes(1))))
                 .build();
     }
 }
