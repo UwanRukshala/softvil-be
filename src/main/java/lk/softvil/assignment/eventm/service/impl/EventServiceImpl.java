@@ -226,23 +226,26 @@ public class EventServiceImpl implements EventService {
         return (root, query, cb) -> cb.greaterThan(root.get("endTime"), now);
     }
 
-    @Cacheable(value = "upcomingEvents", key = "#visibility != null ? #visibility.name() + '-' + #pageable.pageNumber + '-' + #pageable.pageSize : 'all-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<EventResponse> getUpcomingEvents(Visibility visibility, Pageable pageable,UUID userId) {
-        Specification<Event> spec = Specification.where(notDeleted())
-                .and(endTimeAfter(LocalDateTime.now()));
+        LocalDateTime now = LocalDateTime.now();
+        System.out.println("Fetching events after: {}"+ now);
 
-        if(isUserHostOrAdmin(userId)){
-            spec = spec.and(visibilityEquals(visibility));
-        }else{
+        Specification<Event> spec = Specification.where(notDeleted())
+                .and(endTimeAfter(now));
+
+        if (isUserHostOrAdmin(userId)) {
             if (visibility != null && visibility != Visibility.ALL) {
-                spec = spec.and(visibilityEquals(Visibility.PUBLIC));
+                spec = spec.and(visibilityEquals(visibility));
             }
+        } else {
+            // Always enforce public visibility for non-host users
+            spec = spec.and(visibilityEquals(Visibility.PUBLIC));
         }
 
+        Page<Event> events = eventRepository.findAll(spec, pageable);
+        System.out.println("Found {} upcoming events"+ events.getTotalElements());
 
-
-        return eventMapper.mapEventPageToEventResponsePage(eventRepository.findAll(spec, pageable));
-
+        return eventMapper.mapEventPageToEventResponsePage(events);
     }
 
 

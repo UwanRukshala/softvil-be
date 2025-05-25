@@ -7,6 +7,7 @@ import lk.softvil.assignment.eventm.security.CustomUserDetails;
 import lk.softvil.assignment.eventm.service.AttendanceService;
 import lk.softvil.assignment.eventm.service.EventService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -84,6 +85,13 @@ public class EventController {
     }
 
     @GetMapping("/upcoming")
+    @Cacheable(
+            value = "upcomingEvents",
+            key = "'user_' + #customUserDetails.userId + " +
+                    "'_visibility_' + (#visibility != null ? #visibility.name() : 'ALL') + " +
+                    "'_page_' + #pageable.pageNumber + '_size_' + #pageable.pageSize + " +
+                    "'_sort_' + #pageable.sort.toString()"
+    )
     public Page<EventResponse> getUpcomingEvents(
             @RequestParam(required = false) Visibility visibility,
             @RequestParam(defaultValue = "0") int page,
