@@ -4,11 +4,13 @@ package lk.softvil.assignment.eventm.controller;
 import lk.softvil.assignment.eventm.dto.UserRegistrationRequest;
 import lk.softvil.assignment.eventm.dto.UserResponse;
 import lk.softvil.assignment.eventm.model.enums.UserRole;
+import lk.softvil.assignment.eventm.security.CustomUserDetails;
 import lk.softvil.assignment.eventm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -36,6 +38,13 @@ public class UserController {
     public UserResponse getUser(@PathVariable UUID id) {
         return userService.getUserById(id);
     }
+
+    @GetMapping("/me")
+    public UserResponse getProfileDetails( @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return userService.getUserById(customUserDetails.getUserId());
+    }
+
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public Page<UserResponse> getAllUsers(

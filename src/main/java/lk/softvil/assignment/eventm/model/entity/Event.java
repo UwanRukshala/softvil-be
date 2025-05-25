@@ -22,6 +22,8 @@ public class Event {
     @Column(nullable = false)
     private String title;
 
+
+    @Column(length = 5000, columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne

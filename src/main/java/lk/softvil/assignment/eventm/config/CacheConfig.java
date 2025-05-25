@@ -45,7 +45,7 @@ public class CacheConfig {
                         .setStatisticsEnabled(true)
                         .setExpiryPolicyFactory(
                                 CreatedExpiryPolicy.factoryOf(
-                                        new Duration(TimeUnit.MINUTES, 10)
+                                        new Duration(TimeUnit.MINUTES, 10) // set TTL as needed
                                 )
                         ));
 

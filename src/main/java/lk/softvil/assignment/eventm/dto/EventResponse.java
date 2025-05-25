@@ -15,5 +15,6 @@ public record EventResponse (
     LocalDateTime endTime,
     String location,
     Visibility visibility,
-    long attendeeCount
+    long attendeeCount,
+    long maybeCount
 ){}

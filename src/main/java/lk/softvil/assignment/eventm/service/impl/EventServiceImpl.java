@@ -6,7 +6,9 @@ import lk.softvil.assignment.eventm.exception.ResourceNotFoundException;
 import lk.softvil.assignment.eventm.mapper.EventMapper;
 import lk.softvil.assignment.eventm.model.entity.Event;
 import lk.softvil.assignment.eventm.model.entity.User;
+import lk.softvil.assignment.eventm.model.enums.AttendanceStatus;
 import lk.softvil.assignment.eventm.model.enums.Visibility;
+import lk.softvil.assignment.eventm.repository.AttendanceRepository;
 import lk.softvil.assignment.eventm.repository.EventRepository;
 import lk.softvil.assignment.eventm.repository.UserRepository;
 import lk.softvil.assignment.eventm.security.CustomUserDetails;
@@ -27,6 +29,7 @@ import java.util.UUID;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final AttendanceRepository attendanceRepository;
     private final EventMapper eventMapper;
 
     @Override
@@ -129,9 +132,25 @@ public class EventServiceImpl implements EventService {
         Specification<Event> spec = Specification.where(notDeleted())
                 .and(visibility != null && visibility != Visibility.ALL ? visibilityEquals(visibility) : null);
 
-        return eventMapper.mapEventPageToEventResponsePage(
-                eventRepository.findAll(spec, pageable)
-        );
+        Page<Event> eventPage = eventRepository.findAll(spec, pageable);
+
+        return eventPage.map(event -> {
+            long count = attendanceRepository.countByEventIdAndStatus(event.getId(), AttendanceStatus.GOING);
+            long countmb = attendanceRepository.countByEventIdAndStatus(event.getId(), AttendanceStatus.MAYBE);
+            return new EventResponse(
+                    event.getId(),
+                    event.getTitle(),
+                    event.getDescription(),
+                    event.getHost().getId(),
+                    event.getHost().getName(),
+                    event.getStartTime(),
+                    event.getEndTime(),
+                    event.getLocation(),
+                    event.getVisibility(),
+                    count,
+                    countmb
+            );
+        });
     }
 
     @Override
@@ -151,6 +170,19 @@ public class EventServiceImpl implements EventService {
                 .createdAt(event.getCreatedAt())
                 .updatedAt(event.getUpdatedAt())
                 .build();
+    }
+
+    @Override
+    public Page<EventResponse>  getHostingEventsByUser(UUID userId, Pageable pageable) {
+        Specification<Event> spec = Specification.where(notDeleted())
+                .and(hostEqualTo(userId));
+
+        Page<Event> eventPage = eventRepository.findAll(spec, pageable);
+        return eventMapper.mapEventPageToEventResponsePage(eventPage);
+    }
+
+    public static Specification<Event> hostEqualTo(UUID userId) {
+        return (root, query, cb) -> cb.equal(root.get("host").get("id"), userId);
     }
 
     // Helper methods
@@ -195,13 +227,19 @@ public class EventServiceImpl implements EventService {
     }
 
     @Cacheable(value = "upcomingEvents", key = "#visibility != null ? #visibility.name() + '-' + #pageable.pageNumber + '-' + #pageable.pageSize : 'all-' + #pageable.pageNumber + '-' + #pageable.pageSize")
-    public Page<EventResponse> getUpcomingEvents(Visibility visibility, Pageable pageable) {
+    public Page<EventResponse> getUpcomingEvents(Visibility visibility, Pageable pageable,UUID userId) {
         Specification<Event> spec = Specification.where(notDeleted())
                 .and(endTimeAfter(LocalDateTime.now()));
 
-        if (visibility != null && visibility != Visibility.ALL) {
+        if(isUserHostOrAdmin(userId)){
             spec = spec.and(visibilityEquals(visibility));
+        }else{
+            if (visibility != null && visibility != Visibility.ALL) {
+                spec = spec.and(visibilityEquals(Visibility.PUBLIC));
+            }
         }
+
+
 
         return eventMapper.mapEventPageToEventResponsePage(eventRepository.findAll(spec, pageable));
 

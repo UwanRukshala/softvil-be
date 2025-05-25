@@ -12,8 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,20 +25,21 @@ import java.util.UUID;
 public class EventController {
 
     private final EventService eventService;
-    private final AttendanceService attendanceService;
 
     // Create event (authenticated users only)
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public EventResponse createEvent(
             @RequestBody @Valid CreateEventRequest request,
-@AuthenticationPrincipal CustomUserDetails customUserDetails
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        return eventService.createEvent(request,customUserDetails);
+        return eventService.createEvent(request, customUserDetails);
     }
 
     // Update event (host or admin only)
     @PutMapping("/{eventId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HOST')")
     public EventResponse updateEvent(
             @PathVariable UUID eventId,
             @RequestBody @Valid UpdateEventRequest request) {
@@ -46,6 +49,7 @@ public class EventController {
     // Soft delete event (host or admin only)
     @DeleteMapping("/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('ADMIN','HOST')")
     public void deleteEvent(
             @PathVariable UUID eventId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
@@ -64,6 +68,7 @@ public class EventController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('ADMIN','HOST')")
     public Page<EventResponse> getAllEvents(
             @RequestParam(required = false) Visibility visibility,
             @RequestParam(defaultValue = "0") int page,
@@ -83,7 +88,18 @@ public class EventController {
             @RequestParam(required = false) Visibility visibility,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PageableDefault(sort = "startTime", direction = Sort.Direction.ASC) Pageable pageable) {
-        return eventService.getUpcomingEvents(visibility, pageable);
+        return eventService.getUpcomingEvents(visibility, pageable, customUserDetails.getUserId());
+    }
+
+    @GetMapping("/myhosting")
+    @PreAuthorize("hasAnyRole('ADMIN','HOST')")
+    public Page<EventResponse> getMyHostingEvents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PageableDefault(sort = "startTime", direction = Sort.Direction.ASC) Pageable pageable) {
+        return eventService.getHostingEventsByUser(customUserDetails.getUserId(), pageable);
     }
 }
