@@ -7,6 +7,4 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 @WebMvcTest(AttendanceController.class)
 class AttendanceControllerTest {
 
-
-    // Add tests here
 }
