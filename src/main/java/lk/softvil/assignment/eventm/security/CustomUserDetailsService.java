@@ -27,7 +27,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(user -> new CustomUserDetails(
                         user.getId(),
                         user.getEmail(),
-                        // Convert user roles to GrantedAuthority
                         mapRolesToAuthorities(user.getRole().name(), user.isBothAdminAndHost())
                 ))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
@@ -35,7 +34,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private List<GrantedAuthority> mapRolesToAuthorities(String role, boolean bothAdminAndHost) {
         List<String> roles = new ArrayList<>();
-        roles.add("ROLE_" + role); // e.g., "ROLE_ADMIN"
+        roles.add("ROLE_" + role);
 
         if (bothAdminAndHost) {
             roles.add("ROLE_ADMIN");

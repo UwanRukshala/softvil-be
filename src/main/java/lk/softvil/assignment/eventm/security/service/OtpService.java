@@ -1,37 +1,32 @@
 package lk.softvil.assignment.eventm.security.service;
-
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
+import java.time.Duration;
 
 @Service
 public class OtpService {
 
+    private final StringRedisTemplate redisTemplate;
 
-    private final Cache<String, String> otpCache;
-
-    public OtpService(CacheManager cacheManager) {
-        this.otpCache = cacheManager.getCache("otp-cache");
+    public OtpService(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
     }
 
     public String generateOtp(String email) {
         String otp = RandomStringUtils.randomNumeric(6);
-        otpCache.put(email, otp);
+        // Store OTP with expiration time (e.g., 5 minutes)
+        redisTemplate.opsForValue().set(email, otp, Duration.ofMinutes(5));
         return otp;
     }
 
     public boolean validateOtp(String email, String otp) {
-        String cachedOtp = otpCache.get(email);
+        String cachedOtp = redisTemplate.opsForValue().get(email);
         return cachedOtp != null && cachedOtp.equals(otp);
     }
 
     public void clearOtp(String email) {
-        otpCache.remove(email);
+        redisTemplate.delete(email);
     }
-
-
 }

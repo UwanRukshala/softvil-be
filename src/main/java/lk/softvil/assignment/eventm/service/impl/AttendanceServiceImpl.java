@@ -1,8 +1,6 @@
 package lk.softvil.assignment.eventm.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import lk.softvil.assignment.eventm.dto.AttendanceResponse;
-import lk.softvil.assignment.eventm.dto.AttendanceStatsResponse;
 import lk.softvil.assignment.eventm.dto.AttendanceUpdateRequest;
 import lk.softvil.assignment.eventm.dto.EventAttendanceResponse;
 import lk.softvil.assignment.eventm.exception.AccessDeniedException;
@@ -11,7 +9,6 @@ import lk.softvil.assignment.eventm.mapper.AttendanceMapper;
 import lk.softvil.assignment.eventm.model.entity.Attendance;
 import lk.softvil.assignment.eventm.model.entity.Event;
 import lk.softvil.assignment.eventm.model.entity.User;
-import lk.softvil.assignment.eventm.model.enums.AttendanceStatus;
 import lk.softvil.assignment.eventm.model.enums.Visibility;
 import lk.softvil.assignment.eventm.repository.AttendanceRepository;
 import lk.softvil.assignment.eventm.repository.EventRepository;
@@ -71,10 +68,6 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .orElse(null);
     }
 
-    @Override
-    public Page<AttendanceResponse> getEventAttendees(UUID eventId, Pageable pageable) {
-        return null;
-    }
 
     @Override
     public Page<EventAttendanceResponse> getUserAttendances(UUID userId, int page, int size) {
@@ -88,75 +81,4 @@ public class AttendanceServiceImpl implements AttendanceService {
         return attendances.map(attendanceMapper::toEventAttendanceResponse);
     }
 
-    @Override
-    public long getAttendeeCount(UUID eventId) {
-        return 0;
-    }
-
-    @Override
-    public AttendanceStatsResponse getEventAttendanceStats(UUID eventId) {
-        return null;
-    }
-
-    @Override
-    public void removeAttendance(UUID eventId, UUID userId) {
-
-    }
-//
-
-//
-//    @Override
-//    public Page<AttendanceResponse> getEventAttendees(UUID eventId, Pageable pageable) {
-//        if (!eventRepository.existsById(eventId)) {
-//            throw new ResourceNotFoundException("Event not found with id: " + eventId);
-//        }
-//        return attendanceRepository.findByEventId(eventId, pageable)
-//                .map(attendanceMapper::toResponse);
-//    }
-//
-//    @Override
-//    public Page<EventAttendanceResponse> getUserAttendances(UUID userId, Pageable pageable) {
-//        if (!userRepository.existsById(userId)) {
-//            throw new ResourceNotFoundException("User not found with id: " + userId);
-//        }
-//        return attendanceRepository.findByUserId(userId, pageable)
-//                .map(attendance -> attendanceMapper.toEventAttendanceResponse(
-//                        attendance.getEvent(),
-//                        attendance.getStatus()
-//                ));
-//    }
-//
-//    @Override
-//    public long getAttendeeCount(UUID eventId) {
-//        return attendanceRepository.countByEventIdAndStatus(eventId, AttendanceStatus.GOING);
-//    }
-//
-//    @Override
-//    public AttendanceStatsResponse getEventAttendanceStats(UUID eventId) {
-//        if (!eventRepository.existsById(eventId)) {
-//            throw new ResourceNotFoundException("Event not found with id: " + eventId);
-//        }
-//
-//        Map<AttendanceStatus, Long> statusCounts = new EnumMap<>(AttendanceStatus.class);
-//        for (AttendanceStatus status : AttendanceStatus.values()) {
-//            statusCounts.put(status,
-//                    attendanceRepository.countByEventIdAndStatus(eventId, status));
-//        }
-//
-//        return new AttendanceStatsResponse(
-//                eventId,
-//                statusCounts,
-//                attendanceRepository.countByEventId(eventId)
-//        );
-//    }
-//
-//    @Override
-//    public void removeAttendance(UUID eventId, UUID userId) {
-////        attendanceRepository.deleteByEventIdAndUserId(eventId, userId);
-//    }
-//
-//    private boolean isUserInvited(Event event, UUID userId) {
-//        // Implement your invitation logic here
-//        return false; // Placeholder
-//    }
 }

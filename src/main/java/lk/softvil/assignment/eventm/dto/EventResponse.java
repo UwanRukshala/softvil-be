@@ -2,6 +2,7 @@ package lk.softvil.assignment.eventm.dto;
 
 import lk.softvil.assignment.eventm.model.enums.Visibility;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,4 +18,4 @@ public record EventResponse (
     Visibility visibility,
     long attendeeCount,
     long maybeCount
-){}
+) implements Serializable {}

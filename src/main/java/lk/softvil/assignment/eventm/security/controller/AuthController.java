@@ -1,9 +1,7 @@
 package lk.softvil.assignment.eventm.security.controller;
 
 import lk.softvil.assignment.eventm.dto.VerifyOtpRequest;
-import lk.softvil.assignment.eventm.repository.UserRepository;
 import lk.softvil.assignment.eventm.security.service.AuthService;
-import lk.softvil.assignment.eventm.security.service.OtpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -20,6 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 @Service
@@ -113,18 +115,52 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<EventResponse> getEvents(LocalDateTime from, LocalDateTime to,
+    public Page<EventResponse> getEvents(LocalDate from, LocalDate to,
                                          String location, Visibility visibility,
                                          Pageable pageable) {
-        Specification<Event> spec = Specification.where(notDeleted())
-                .and(from != null ? startTimeAfter(from) : null)
-                .and(to != null ? endTimeBefore(to) : null)
-                .and(location != null ? locationContains(location) : null)
-                .and(visibility != null ? visibilityEquals(visibility) : null);
 
-        return eventMapper.mapEventPageToEventResponsePage(
-                eventRepository.findAll(spec, pageable)
-        );
+        Specification<Event> spec = Specification.where(notDeleted());
+
+        if (from != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.greaterThanOrEqualTo(root.get("startTime"), from));
+        }
+
+        if (to != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.lessThanOrEqualTo(root.get("endTime"), to));
+        }
+
+        if (location != null && !location.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("location")), "%" + location.trim().toLowerCase() + "%"));
+        }
+
+        if (visibility != null && visibility != Visibility.ALL) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("visibility"), visibility));
+        }
+
+        Page<Event> eventPage = eventRepository.findAll(spec, pageable);
+
+        return eventPage.map(event -> {
+            long countGoing = attendanceRepository.countByEventIdAndStatus(event.getId(), AttendanceStatus.GOING);
+            long countMaybe = attendanceRepository.countByEventIdAndStatus(event.getId(), AttendanceStatus.MAYBE);
+
+            return new EventResponse(
+                    event.getId(),
+                    event.getTitle(),
+                    event.getDescription(),
+                    event.getHost().getId(),
+                    event.getHost().getName(),
+                    event.getStartTime(),
+                    event.getEndTime(),
+                    event.getLocation(),
+                    event.getVisibility(),
+                    countGoing,
+                    countMaybe
+            );
+        });
     }
 
     @Override
@@ -226,24 +262,52 @@ public class EventServiceImpl implements EventService {
         return (root, query, cb) -> cb.greaterThan(root.get("endTime"), now);
     }
 
-    @Cacheable(value = "upcomingEvents", key = "#visibility != null ? #visibility.name() + '-' + #pageable.pageNumber + '-' + #pageable.pageSize : 'all-' + #pageable.pageNumber + '-' + #pageable.pageSize")
-    public Page<EventResponse> getUpcomingEvents(Visibility visibility, Pageable pageable,UUID userId) {
-        Specification<Event> spec = Specification.where(notDeleted())
-                .and(endTimeAfter(LocalDateTime.now()));
+    public Page<EventResponse> getUpcomingEvents(
+            Visibility visibility,
+            String location,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable,
+            UUID userId
+    ) {
+        LocalDateTime now = LocalDateTime.now();
 
-        if(isUserHostOrAdmin(userId)){
-            spec = spec.and(visibilityEquals(visibility));
-        }else{
-            if (visibility != null && visibility != Visibility.ALL) {
-                spec = spec.and(visibilityEquals(Visibility.PUBLIC));
-            }
+        // Start with not-deleted and ongoing/upcoming events
+        Specification<Event> spec = Specification.where(notDeleted())
+                .and(endTimeAfter(now));
+
+        // Filter: Start time from 'from'
+        if (from != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.greaterThanOrEqualTo(root.get("startTime"), from));
         }
 
+        // Filter: End time up to 'to'
+        if (to != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.lessThanOrEqualTo(root.get("endTime"), to));
+        }
 
+        // Filter: Location (case-insensitive partial match)
+        if (location != null && !location.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("location")), "%" + location.toLowerCase().trim() + "%"));
+        }
 
-        return eventMapper.mapEventPageToEventResponsePage(eventRepository.findAll(spec, pageable));
+        // Apply visibility rules based on user privileges
+        boolean isPrivileged = isUserHostOrAdmin(userId);
 
+        if (isPrivileged) {
+            if (visibility != null && visibility != Visibility.ALL) {
+                spec = spec.and(visibilityEquals(visibility));
+            }
+            // If ALL or null: no restriction
+        } else {
+            spec = spec.and(visibilityEquals(Visibility.PUBLIC));
+        }
+
+        Page<Event> events = eventRepository.findAll(spec, pageable);
+        return eventMapper.mapEventPageToEventResponsePage(events);
     }
-
 
 }
