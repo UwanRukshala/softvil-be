@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -59,9 +60,10 @@ public class EventController {
 
     // List events with filtering
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HOST')")
     public Page<EventResponse> getEvents(
-            @RequestParam(required = false) LocalDateTime from,
-            @RequestParam(required = false) LocalDateTime to,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to,
             @RequestParam(required = false) String location,
             @RequestParam(required = false) Visibility visibility,
             @PageableDefault(sort = "startTime", direction = Sort.Direction.ASC) Pageable pageable) {
@@ -87,18 +89,26 @@ public class EventController {
     @GetMapping("/upcoming")
     @Cacheable(
             value = "upcomingEvents",
-            key = "'user_' + #customUserDetails.userId + " +
+            key = "'user_' + #customUserDetails?.userId + " +
                     "'_visibility_' + (#visibility != null ? #visibility.name() : 'ALL') + " +
+                    "'_location_' + (#location != null ? #location : 'any') + " +
+                    "'_from_' + (#from != null ? #from.toString() : 'null') + " +
+                    "'_to_' + (#to != null ? #to.toString() : 'null') + " +
                     "'_page_' + #pageable.pageNumber + '_size_' + #pageable.pageSize + " +
                     "'_sort_' + #pageable.sort.toString()"
     )
     public Page<EventResponse> getUpcomingEvents(
             @RequestParam(required = false) Visibility visibility,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "6") int size,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PageableDefault(sort = "startTime", direction = Sort.Direction.ASC) Pageable pageable) {
-        return eventService.getUpcomingEvents(visibility, pageable, customUserDetails.getUserId());
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to,
+            @PageableDefault(sort = "startTime", direction = Sort.Direction.ASC) Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+
+    ) {
+        return eventService.getUpcomingEvents(
+                visibility, location, from, to, pageable, customUserDetails.getUserId()
+        );
     }
 
     @GetMapping("/myhosting")
