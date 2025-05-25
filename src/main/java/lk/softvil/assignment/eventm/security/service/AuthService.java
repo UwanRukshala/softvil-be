@@ -31,7 +31,7 @@ public class AuthService {
         String otp = otpService.generateOtp(email);
         emailService.sendOtpEmail(email, otp);
 
-        return Map.of("message", "OTP sent to your email");
+        return Map.of("message", "OTP sent to your email -"+otp+" ");
     }
 
     public Map<String, String> verifyOtp(String email, String otp) {
